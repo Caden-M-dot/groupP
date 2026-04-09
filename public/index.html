@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Store Entry Form</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; }
+  h2 { margin-top: 40px; }
+  form { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; }
+  label { display: block; margin: 5px 0 2px; }
+  input, button { margin: 5px 0; padding: 5px; }
+  pre { background: #f4f4f4; padding: 10px; overflow: auto; }
+</style>
+</head>
+<body>
+<h1>Store Entry Form</Form></h1>
+
+<h2>Create Item</h2>
+<form id="createItemForm">
+  <label>storeID:</label><input type="text" id="createStoreID" required>
+  <label>storeName:</label><input type="text" id="createStoreName" required>
+  <label>productID:</label><input type="text" id="createProductID" required>
+  <label>productName:</label><input type="text" id="createProductName" required>
+  <label>price:</label><input type="text" id="createPrice" required>
+  <button type="submit">Create Item</button>
+</form>
+
+<h2>Get Item</h2>
+<form id="getItemForm">
+  <label>Item ID:</label><input type="text" id="getItemId" required>
+  <button type="submit">Fetch Item</button>
+</form>
+
+<h2>Get All Items</h2>
+<form id="getAllItemsForm">
+  <button type="submit">Fetch All items</button>
+</form>
+
+<h2>Update Item</h2>
+<form id="updateItemForm">
+  <label>Item ID:</label><input type="text" id="updateItemID" required>
+  <label>New Product ID:</label><input type="text" id="updateProductID" >
+  <label>New Store ID:</label><input type="text" id="updateStoreID">
+  <label>New Store Name:</label><input type="text" id="updateStoreName">
+  <label>New Product Name:</label><input type="text" id="updateProductName">
+  <label>New Price:</label><input type="text" id="updatePrice">
+  <button type="submit">Update Item</button>
+</form>
+
+<h2>Delete Item</h2>
+<form id="deleteItemForm">
+  <label>Item ID:</label><input type="text" id="deleteItemID" required>
+  <button type="submit">Delete Item</button>
+</form>
+
+<h2>Response</h2>
+<pre id="jsonOutput">{}</pre>
+
+<script>
+const output = document.getElementById('jsonOutput');
+const apiBase = 'http://localhost:3000';
+
+function showJSON(data) {
+  output.textContent = JSON.stringify(data, null, 2);
+}
+
+async function handleFetch(url, options) {
+  try {
+    const res = await fetch(url, options);
+    const text = await res.text();
+    try {
+      // Try parsing JSON
+      const data = JSON.parse(text);
+      showJSON(data);
+    } catch {
+      // If not JSON, show as text
+      showJSON({ status: res.status, data: text });
+    }
+  } catch (err) {
+    showJSON({ error: err.message });
+  }
+}
+
+// CREATE
+document.getElementById('createItemForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const storeID = document.getElementById('createStoreID').value;
+  const storeName = document.getElementById('createStoreName').value;
+  const productID = document.getElementById('createProductID').value;
+  const productName = document.getElementById('createProductName').value;
+  const price = document.getElementById('createPrice').value;
+  handleFetch(`${apiBase}/items`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ storeID, storeName, productID, productName, price})
+  });
+});
+
+// READ
+document.getElementById('getItemForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const id = document.getElementById('getItemId').value;
+  handleFetch(`${apiBase}/items/${id}`);
+});
+
+// Get All
+document.getElementById('getAllItemsForm').addEventListener('submit', e => {
+  e.preventDefault();
+  handleFetch(`${apiBase}/items`);
+});
+
+// UPDATE
+document.getElementById('updateItemForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const id = document.getElementById('updateItemID').value;
+  const storeID = document.getElementById('updateStoreID').value;
+  const storeName = document.getElementById('updateStoreName').value;
+  const productID = document.getElementById('updateProductID').value;
+  const productName = document.getElementById('updateProductName').value;
+  const price = document.getElementById('updatePrice').value;
+  handleFetch(`${apiBase}/items/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ storeID, storeName, productID, productName, price })
+  });
+});
+
+// DELETE
+document.getElementById('deleteItemForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const id = document.getElementById('deleteItemID').value;
+  handleFetch(`${apiBase}/items/${id}`, { method: 'DELETE' });
+});
+</script>
+</body>
+</html>
